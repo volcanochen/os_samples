@@ -1,0 +1,40 @@
+@startuml
+title 中断响应时间测试模块代码逻辑序列图
+
+actor 用户
+participant 模块初始化函数 as init
+participant 定时器回调函数 as timer_cb
+participant 中断处理函数 as irq_handler
+participant 模块退出函数 as exit
+
+用户 -> init: 加载模块
+activate init
+init -> init: 初始化设备标识符
+init -> init: 注册中断处理函数
+init -> init: 初始化 GPIO 引脚（如果有）
+init -> init: 初始化高精度定时器
+init -> init: 启动定时器
+deactivate init
+
+loop 定时器触发
+    timer_cb -> timer_cb: 触发 GPIO 引脚电平变化
+    timer_cb -> timer_cb: 重新设置定时器触发时间
+    timer_cb -> irq_handler: 触发中断
+    activate irq_handler
+    irq_handler -> irq_handler: 记录中断开始时间
+    irq_handler -> irq_handler: 模拟中断处理工作
+    irq_handler -> irq_handler: 记录中断结束时间
+    irq_handler -> irq_handler: 计算中断处理时间
+    irq_handler -> irq_handler: 累加总时间和次数
+    deactivate irq_handler
+end
+
+用户 -> exit: 卸载模块
+activate exit
+exit -> exit: 注销中断处理函数
+exit -> exit: 停止高精度定时器
+exit -> exit: 释放 GPIO 引脚（如果有）
+exit -> exit: 计算并输出平均中断处理时间
+deactivate exit
+
+@enduml
